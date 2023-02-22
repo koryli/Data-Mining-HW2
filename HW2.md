@@ -48,6 +48,7 @@ my best model performs better than the big model.
 
 ### Model validation: step 2
 The predict accuracy: 
+
 $Fold01
 [1] 0.904
 
@@ -88,7 +89,7 @@ $Fold13
 [1] 0.948
 
 $Fold14
-[1] 0.9518072
+[1] 0.952
 
 $Fold15
 [1] 0.916
