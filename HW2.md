@@ -1,6 +1,7 @@
 ### Author: Suyu Liu, Siyuan Liu, Jingru Li
 ## Q1 Saratoga house prices
 -   **Linear model for the price**
+
 Backward selection model:
 rmse of step_lm:  [1] 53013.2
 
