@@ -16,7 +16,9 @@ Residuals:
     Min      1Q  Median      3Q     Max 
 -225934  -34419   -5723   28364  459112 
 
+
 Coefficients:
+
                                Estimate Std. Error t value Pr(>|t|)    
 (Intercept)                   1.494e+05  1.787e+04   8.360  < 2e-16 ***
 lotSize                       6.021e+03  2.272e+03   2.650  0.00814 ** 
