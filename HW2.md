@@ -12,31 +12,6 @@ lm(formula = price ~ lotSize + age + landValue + livingArea +
     bedrooms + bathrooms + rooms + centralAir + waterfront + 
     livingArea:newConstruction, data = saratoga_train)
 
-Residuals:
-    Min      1Q  Median      3Q     Max 
--225934  -34419   -5723   28364  459112 
-
-
-Coefficients:
-
-                               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                   1.494e+05  1.787e+04   8.360  < 2e-16 ***
-lotSize                       6.021e+03  2.272e+03   2.650  0.00814 ** 
-age                          -1.474e+02  6.013e+01  -2.452  0.01435 *  
-landValue                     9.334e-01  5.203e-02  17.940  < 2e-16 ***
-livingArea                    5.408e+01  5.700e+00   9.488  < 2e-16 ***
-bedrooms                     -8.157e+03  2.907e+03  -2.806  0.00509 ** 
-bathrooms                     2.359e+04  3.754e+03   6.284 4.41e-10 ***
-rooms                         3.598e+03  1.092e+03   3.294  0.00101 ** 
-centralAirNo                 -1.054e+04  3.687e+03  -2.859  0.00431 ** 
-waterfrontNo                 -1.268e+05  1.629e+04  -7.783 1.39e-14 ***
-livingArea:newConstructionNo  1.513e+01  3.236e+00   4.675 3.23e-06 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 59460 on 1371 degrees of freedom
-Multiple R-squared:  0.6431,	Adjusted R-squared:  0.6404 
-F-statistic:   247 on 10 and 1371 DF,  p-value: < 2.2e-16
 
 RMSE of Selected model:
 [1] 59225.28
