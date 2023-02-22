@@ -62,21 +62,14 @@ Number of Fisher Scoring iterations: 4
               -1.88                0.72                0.10 
       purposenewcar      purposeusedcar       foreigngerman 
                0.85               -0.80               -1.26 
-   yhat
-   
-y     0   1
+               
 
-  0 645  55
-  
-  1 211  89
-  
-[1] 0.734
+![image](https://user-images.githubusercontent.com/112587000/220753394-1c1d69a9-b606-4fee-bf38-994f514754da.png)
 
-  0   1 
-  
-700 300 
+The coefficient for historypoor is -1.11. So having a poor history credit in a loan fell into default at some point before it was paid back to the bank odds of default by e^-1.11 = 0.329559;
+The coefficient for historyterrible is -1.88. So having a terrible history credit in a loan fell into default at some point before it was paid back to the bank, odds of default by e^-1.88 = 0.15259. Coef of historypoor is larger than historyterrible, meaning that people with poor credit are more likely to fall into default than those with terrible credit. This does not fit reality. This phenomenon is because it is very difficult for people with terrible credit to get loans, so the number of people with terrible credit in the sample is smaller than those with poor credit, resulting in a more significant impact of poor credit on the probability of default.
 
-[1] 0.7
+This data set is not appropriate for building a predictive model of defaults. Because there is selection bias. And to eliminate bias, I think we can randomly select the borrowers and use 'history' to group them. Then we can screen prospective borrowers to classify them into "high" versus "low" probability of default.
 
 
 ## Q3 Children and hotel reservations
