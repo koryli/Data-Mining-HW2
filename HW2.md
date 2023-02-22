@@ -6,26 +6,41 @@
 ## Q3 Children and hotel reservations
 ### Model building
 small model:
+
 RMSE: 
 [1] 0.2681091
+
 Accuracy:
 [1] 0.9194444
+
 big model:
+
 RMSE:
 [1] 0.2315222
+
 Accuracy:
 [1] 0.9358889
+
 My best model:
+
 RMSE:
 [1] 0.2301603
+
 Accuracy:
 [1] 0.9373333
+
 Model building:
+
 My best model is children ~ . - arrival_date - days_in_waiting_list - required_car_parking_spaces + total_of_special_requests:adults  + adults:booking_changes + adults:assigned_room_type
+
 The RMSE of the small model is larger than the big model.
+
 The RMSE of the big model is larger than my best model.
+
 And the predict accuracy is the same situation.
+
 So the big model performs better than the small model,
+
 my best model performs better than the big model.
 
 ### Model validation: step 1
