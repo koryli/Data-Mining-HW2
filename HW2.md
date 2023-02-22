@@ -45,6 +45,58 @@ For the KNN regression, I use the cross validation to choose K with the lowest R
 Comparing these two models, I find when considering more variables into the linear regression model, the RMSE increase more likely and the model will performance worse. Because the model includes some explanatory variables that have no or little effect on price, like heating, fuel.
 
 ## Q2 Classification and retrospective sampling
+![image](https://user-images.githubusercontent.com/112587000/220752505-be907f2a-1057-4765-a188-21e1f196f191.png)
+Call:
+glm(formula = Default ~ duration + amount + installment + age + 
+    history + purpose + foreign, family = binomial, data = german_credit)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.3464  -0.8050  -0.5751   1.0250   2.4767  
+
+Coefficients:
+                      Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         -7.075e-01  4.726e-01  -1.497  0.13435    
+duration             2.526e-02  8.100e-03   3.118  0.00182 ** 
+amount               9.596e-05  3.650e-05   2.629  0.00856 ** 
+installment          2.216e-01  7.626e-02   2.906  0.00366 ** 
+age                 -2.018e-02  7.224e-03  -2.794  0.00521 ** 
+historypoor         -1.108e+00  2.473e-01  -4.479 7.51e-06 ***
+historyterrible     -1.885e+00  2.822e-01  -6.679 2.41e-11 ***
+purposeedu           7.248e-01  3.707e-01   1.955  0.05058 .  
+purposegoods/repair  1.049e-01  2.573e-01   0.408  0.68346    
+purposenewcar        8.545e-01  2.773e-01   3.081  0.00206 ** 
+purposeusedcar      -7.959e-01  3.598e-01  -2.212  0.02694 *  
+foreigngerman       -1.265e+00  5.773e-01  -2.191  0.02849 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1221.7  on 999  degrees of freedom
+Residual deviance: 1070.0  on 988  degrees of freedom
+AIC: 1094
+
+Number of Fisher Scoring iterations: 4
+
+        (Intercept)            duration              amount 
+              -0.71                0.03                0.00 
+        installment                 age         historypoor 
+               0.22               -0.02               -1.11 
+    historyterrible          purposeedu purposegoods/repair 
+              -1.88                0.72                0.10 
+      purposenewcar      purposeusedcar       foreigngerman 
+               0.85               -0.80               -1.26 
+   yhat
+y     0   1
+  0 645  55
+  1 211  89
+[1] 0.734
+
+  0   1 
+700 300 
+[1] 0.7
+
 
 ## Q3 Children and hotel reservations
 ### Model building
