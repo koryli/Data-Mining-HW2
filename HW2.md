@@ -1,9 +1,8 @@
 ### Author: Suyu Liu, Siyuan Liu, Jingru Li
 ## Q1 Saratoga house prices
 -   **Linear model for the price**
-
-rmse of step_lm:
-[1] 53013.2
+Backward selection model:
+rmse of step_lm:  [1] 53013.2
 
 Based on the backward selection, although the RMSE is lower, the function contains too many variables and is kind of hard to explain in the reality. So, we try to select by hand based on the significance.
 
@@ -13,16 +12,12 @@ lm(formula = price ~ lotSize + age + landValue + livingArea +
     livingArea:newConstruction, data = saratoga_train)
 
 
-RMSE of Selected model:
-[1] 59225.28
+RMSE of Selected model:  [1] 59225.28
 
 Out-of-sample RMSE:
 
 Average the estimate of out-of-sample RMSE over 100 different random train/test splits randomly:
-
-  result 
-  
-58067.95 
+RMSE:  58067.95 
 
 -   **KNN regression model for the price**
 
@@ -30,8 +25,7 @@ Pick up K value by cross-validation and the RMSE:
 
 The model is regressing price on lotSize + age + livingArea + pctCollege + bedrooms + fireplaces + bathrooms + rooms + heating + fuel + centralAir + landValue + sewer + newConstruction +waterfront.
 
-RMSE of knn regression model(k = 10):
-69217.9	
+RMSE of knn regression model(k = 10): 69217.9	
 
 ### Report:
 Based on the results, the first model has the lower out-of-sample mean-squared error, meaning this model fits better.
