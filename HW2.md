@@ -63,13 +63,19 @@ Number of Fisher Scoring iterations: 4
       purposenewcar      purposeusedcar       foreigngerman 
                0.85               -0.80               -1.26 
    yhat
+   
 y     0   1
+
   0 645  55
+  
   1 211  89
+  
 [1] 0.734
 
   0   1 
+  
 700 300 
+
 [1] 0.7
 
 
