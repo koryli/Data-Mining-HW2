@@ -57,19 +57,19 @@ Deviance Residuals:
 Coefficients:
                       Estimate Std. Error z value Pr(>|z|)    
 (Intercept)         -7.075e-01  4.726e-01  -1.497  0.13435    
-duration             2.526e-02  8.100e-03   3.118  0.00182 ** 
-amount               9.596e-05  3.650e-05   2.629  0.00856 ** 
-installment          2.216e-01  7.626e-02   2.906  0.00366 ** 
-age                 -2.018e-02  7.224e-03  -2.794  0.00521 ** 
-historypoor         -1.108e+00  2.473e-01  -4.479 7.51e-06 ***
-historyterrible     -1.885e+00  2.822e-01  -6.679 2.41e-11 ***
-purposeedu           7.248e-01  3.707e-01   1.955  0.05058 .  
+duration             2.526e-02  8.100e-03   3.118  0.00182 
+amount               9.596e-05  3.650e-05   2.629  0.00856 
+installment          2.216e-01  7.626e-02   2.906  0.00366 
+age                 -2.018e-02  7.224e-03  -2.794  0.00521 
+historypoor         -1.108e+00  2.473e-01  -4.479 7.51e-06 
+historyterrible     -1.885e+00  2.822e-01  -6.679 2.41e-11 
+purposeedu           7.248e-01  3.707e-01   1.955  0.05058 
 purposegoods/repair  1.049e-01  2.573e-01   0.408  0.68346    
-purposenewcar        8.545e-01  2.773e-01   3.081  0.00206 ** 
-purposeusedcar      -7.959e-01  3.598e-01  -2.212  0.02694 *  
-foreigngerman       -1.265e+00  5.773e-01  -2.191  0.02849 *  
+purposenewcar        8.545e-01  2.773e-01   3.081  0.00206 
+purposeusedcar      -7.959e-01  3.598e-01  -2.212  0.02694 
+foreigngerman       -1.265e+00  5.773e-01  -2.191  0.02849 
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
 
 (Dispersion parameter for binomial family taken to be 1)
 
