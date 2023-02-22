@@ -1,0 +1,315 @@
+---
+title: "data mining-hw2"
+author: "suyu liu, siyuan liu, jingru li" 
+date: "2023-02-19"
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(broom)
+library(tidyverse)
+library(rsample)
+library(caret)
+library(modelr)
+library(knitr)
+library(mosaic)
+library(parallel)
+library(foreach)
+library(ModelMetrics)
+
+```
+
+## Saratoga house prices
+
+-   **Linear model for the price**
+
+```{r,echo=FALSE}
+data(SaratogaHouses)
+glimpse(SaratogaHouses)
+
+## linear model 
+# Split into training and testing sets
+saratoga_split = initial_split(SaratogaHouses, prop = 0.8)
+saratoga_train = training(saratoga_split)
+saratoga_test = testing(saratoga_split)
+
+# Fit to the training data
+# Sometimes it's easier to name the variables we want to leave out
+# The command below yields exactly the same model.
+# the dot (.) means "all variables not named"
+# the minus (-) means "exclude this variable"
+
+
+lm_large = lm(price ~ (.)^2, data=saratoga_train)
+#backward selection
+library(MASS)
+step_lm = stepAIC(lm_large,
+                 direction = "backward",
+                 trace = TRUE)
+
+rmse(step_lm, saratoga_test) 
+
+```
+
+Based on the backward selection, although the RMSE is lower, the function contains too many variables and is kind of hard to explain in the reality. So, we try to select by hand based on the significance. 
+
+```{r,echo=FALSE}
+##select by hand
+lm_s1=lm(price ~ lotSize  + age+ landValue + livingArea  + bedrooms + 
+             bathrooms + rooms + centralAir + waterfront
+              + livingArea:newConstruction 
+                  , data=saratoga_train)
+summary(lm_s1)
+rmse(lm_s1, saratoga_test) 
+```
+
+Out-of-sample RMSE:
+
+Average the estimate of out-of-sample RMSE over 100 different random train/test splits randomly:
+
+```{r,echo=FALSE}
+
+n = nrow(SaratogaHouses)
+rmse_vals = do(100)*{
+  
+  # re-split into train and test cases
+  n_train = round(0.8*n)  # round to nearest integer
+  n_test = n - n_train
+  train_cases = sample.int(n, n_train, replace=FALSE)
+  test_cases = setdiff(1:n, train_cases)
+  saratoga_train = SaratogaHouses[train_cases,]
+  saratoga_test = SaratogaHouses[test_cases,]
+  
+  # fit to this training set
+  lm_s1=lm(price ~ lotSize + age + landValue + livingArea  + bedrooms + 
+             bathrooms + rooms + centralAir + waterfront
+           + livingArea:newConstruction, 
+           data=saratoga_train)
+
+  
+  # predict on this testing set
+  yhat_test_s1 = predict(lm_s1, saratoga_test)
+  
+  c(rmse(saratoga_test$price, yhat_test_s1))
+}
+
+
+colMeans(rmse_vals)
+
+```
+
+-   **KNN regression model for the price**
+
+Pick up K value by cross-validation and the RMSE:
+
+The model is regressing price on lotSize + age + livingArea + pctCollege + bedrooms + fireplaces + bathrooms + rooms + heating + fuel + centralAir + landValue + sewer + newConstruction +waterfront.
+
+```{r,echo=FALSE}
+## k-cross validation
+# split into training and testing
+saratoga_split = initial_split(SaratogaHouses, prop = 0.8)
+saratoga_train = training(saratoga_split)
+saratoga_test = testing(saratoga_split)
+
+################ now use k-folds cross validation ##################
+K_folds = 5
+# method: second pipeline
+SaratogaHouses_folds = crossv_kfold(SaratogaHouses, k=K_folds)
+# so now we can do this across a range of k
+k_grid = c(2, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 45,
+           50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250, 300)
+# models across the same train/test splits
+cv_grid = foreach(k=k_grid, .combine = 'rbind') %dopar% {
+  models=map(SaratogaHouses_folds$train, ~ knnreg(price ~ lotSize + age + livingArea + pctCollege + bedrooms +  fireplaces + bathrooms + rooms +   heating + fuel + centralAir + landValue + sewer + newConstruction +waterfront, k=k, data=., use.all=FALSE))
+  
+  errs=map2_dbl(models, SaratogaHouses_folds$test, modelr::rmse)
+  c(k=k, err = mean(errs), std_err=sd(errs)/sqrt(K_folds))
+} %>% as.data.frame
+
+mink_saratogahouse=cv_grid%>%
+  arrange(err) %>%
+  head(1) 
+
+mink_saratogahouse
+```
+
+Based on the results, the first model has the lower out-of-sample mean-squared error, meaning this model fits better.
+
+(the formula = price ~ lotSize+age +landValue +livingArea+bedrooms+bathrooms+rooms+centralAir + waterfront+livingArea:newConstruction)
+
+For the linear model selection, I firstly use backward selection, but the model contains more variables and some of them are not statistically significant. To get a lower RMSE and reasonable function, I choose the variables by hand and intuition based on their significance and the model as above. When estimating the house price, we need consider the lotSize, age, landValue, livingArea, bedrooms, bathrooms, rooms, centralAir, waterfront and the interaction of livingArea and newConstruction of the house. And some variables, like heating, fuel and sewer, have insignificant impact on the price, so I exclude them from the model.    
+
+For the KNN regression, I use the cross validation to choose K with the lowest RMSE. And the model is simply polynomial linear regression, including all variables in the data.
+
+Comparing these two models, I find when considering more variables into the linear regression model, the RMSE increase more likely and the model will performance worse. Because the model includes some explanatory variables that have no or little effect on price, like heating, fuel.
+
+
+##Problem 2
+```{r}
+#german_credit = read.csv("data/german_credit.csv")
+default_bar = german_credit %>%
+  group_by(history) %>%
+  summarize(default_prob = sum(Default, na.rm = TRUE) / n()) %>% 
+  ggplot(aes(x = history, y = default_prob)) +
+  geom_col() + 
+  labs(title = "Default probability based on credit history", y = "Default probability", x = "Credit history")
+default_bar
+
+logit_default = glm(Default ~ duration + amount + installment + age + history + purpose + foreign, data = german_credit, family = binomial)
+summary(logit_default)
+coef(logit_default) %>% round(2)
+phat_default = predict(logit_default, german_credit, type = 'response' )
+yhat_default = ifelse(phat_default > 0.5, 1, 0)
+confusion_logit = table(y = german_credit$Default,
+                        yhat = yhat_default)
+confusion_logit
+sum(diag(confusion_logit))/sum(confusion_logit)
+table(german_credit$Default)
+700/sum(table(german_credit$Default))
+```
+The coefficient for historypoor is -1.11. So having a poor history credit in a loan fell into default at some point before it was paid back to the bank odds of default by e^-1.11 = 0.329559;
+The coefficient for historyterrible is -1.88. So having a terrible history credit in a loan fell into default at some point before it was paid back to the bank, odds of default by e^-1.88 = 0.15259. Coef of historypoor is larger than historyterrible, meaning that people with poor credit are more likely to fall into default than those with terrible credit. This does not fit reality. This phenomenon is because it is very difficult for people with terrible credit to get loans, so the number of people with terrible credit in the sample is smaller than those with poor credit, resulting in a more significant impact of poor credit on the probability of default.
+
+This data set is not appropriate for building a predictive model of defaults. Because there is selection bias. And to eliminate bias, I think we can randomly select the borrowers and use 'history' to group them. Then we can screen prospective borrowers to classify them into "high" versus "low" probability of default.
+
+
+
+
+```{r}
+#Q3: Children and hotel reservations
+
+hotels_dev = read.csv("data/hotels_dev.csv")
+hotel_split =  initial_split(hotels_dev, prop=0.8)
+hotel_train = training(hotel_split)
+hotel_test  = testing(hotel_split)
+
+#small model
+lm1 = lm(children ~ market_segment + adults + customer_type + is_repeated_guest, data=hotel_train)
+#rmse
+rmse(lm1, hotel_test)
+# confusion matrix
+phat_test_hotel1 = predict(lm1, hotel_test)
+yhat_test_hotel1 = ifelse(phat_test_hotel1 > 0.5, 1, 0)
+confusion_out1 = table(y = hotel_test$children, yhat = yhat_test_hotel1)
+
+sum(diag(confusion_out1))/sum(confusion_out1)
+
+#big model
+lm2 = lm(children ~ . - arrival_date, data=hotel_train)
+#rmse
+rmse(lm2, hotel_test)
+ # confusion matrix
+phat_test_hotel2 = predict(lm2, hotel_test)
+yhat_test_hotel2 = ifelse(phat_test_hotel2 > 0.5, 1, 0)
+confusion_out2 = table(y = hotel_test$children, yhat = yhat_test_hotel2)
+
+sum(diag(confusion_out2))/sum(confusion_out2)
+
+#the best model:
+#step1: only delete some variables (to minimize rmse)
+lm3 = lm(children ~ . - arrival_date - days_in_waiting_list - required_car_parking_spaces, data=hotel_train)
+#step2:add some interactions
+lm4 = lm(children ~ . - arrival_date - days_in_waiting_list - required_car_parking_spaces + total_of_special_requests:adults  + adults:booking_changes + adults:assigned_room_type, data=hotel_train )
+#rmse
+rmse(lm4, hotel_test)
+ # confusion matrix
+phat_test_hotel4 = predict(lm4, hotel_test)
+yhat_test_hotel4 = ifelse(phat_test_hotel4 > 0.5, 1, 0)
+confusion_out4 = table(y = hotel_test$children, yhat = yhat_test_hotel4)
+
+sum(diag(confusion_out4))/sum(confusion_out4)
+
+```
+Model building:
+My best model is children ~ . - arrival_date - days_in_waiting_list - required_car_parking_spaces + total_of_special_requests:adults  + adults:booking_changes + adults:assigned_room_type
+The RMSE of the small model is larger than the big model.
+The RMSE of the big model is larger than my best model.
+And the predict accuracy is the same situation.
+So the big model performs better than the small model,
+my best model performs better than the big model.
+  
+
+```{r}
+#step1:ROC
+hotels_val = read.csv("data/hotels_val.csv")
+phat_test_lm_hotel = predict(lm4, hotels_val, type='response')
+
+thresh_grid = seq(0.95, 0.05, by=-0.005)
+roc_curve_hotel = foreach(thresh = thresh_grid, .combine='rbind') %do% {
+  yhat_test_linear_hotel = ifelse(phat_test_lm_hotel >= thresh, 1, 0)
+
+# FPR, TPR for linear model
+  confusion_out_linear = table(y = hotels_val$children, yhat = yhat_test_linear_hotel)
+
+  out_lin = data.frame(model = "linear",
+                       TPR = confusion_out_linear[2,2]/sum(hotels_val$children==1),
+                       FPR = confusion_out_linear[1,2]/sum(hotels_val$children==0))
+} %>% as.data.frame()
+ggplot(roc_curve_hotel) + 
+  geom_line(aes(x=FPR, y=TPR)) + 
+  labs(title="ROC curves: linear model") +
+  theme_bw(base_size = 10)
+```
+
+```{r}
+#step2
+#create fold
+hotel_fold = createFolds(hotels_val$children, k = 20)
+#"expected" number of bookings with children versus actual number in each fold
+hotel_resul = lapply(hotel_fold, function(x){
+  hotel_test = hotels_val[x,]
+  hotel_pre = predict(lm4, hotel_test)
+   return(hotel_pre)
+})
+actual = lapply(hotel_fold, function(x){
+    hotel_test = hotels_val[x,]
+    return(sum(hotel_test$children))
+})
+
+expected = c()
+difference = c()
+for (k in seq(1, 20)){ 
+  expected = append(expected, mean(unlist(hotel_resul[k]))*250)
+  difference = append(difference, as.integer(unlist(actual[k])) - as.integer(expected[k]))
+}
+
+result = cbind(expected, actual, difference)
+
+actual1 =  array( unlist( actual ))
+hotel_pic = data.frame(x = 1:20, y1 = expected, y2 = actual1, y3 = difference)
+df_reshaped <- data.frame(x = hotel_pic$x,                           
+                       y = c(hotel_pic$y1, hotel_pic$y2, hotel_pic$y3),
+                       group = c(rep("expected", nrow(hotel_pic)),
+                                 rep("actual", nrow(hotel_pic)),
+                                 rep("difference", nrow(hotel_pic))))
+ggplot(df_reshaped, aes(x = x, y = y, colour = group)) +
+  labs(x="Fold No.",
+       y="The Sum of Children Number",
+       title="'Expected' Number of Bookings with Vhildren versus Actual Number") +
+  geom_line() 
+
+#the predicted probabilities
+#probability of all
+phat_test_hotel = predict(lm4, hotels_val)
+yhat_test_hotel = ifelse(phat_test_hotel > 0.5, 1, 0)
+confusion_out = table(y = hotels_val$children, yhat = yhat_test_hotel)
+confusion_out  # confusion matrix
+sum(diag(confusion_out))/sum(confusion_out)
+
+# probability for each fold
+hotel_acc = lapply(hotel_fold, function(x){
+  hotel_test = hotels_val[x,]
+  hotel_pre = predict(lm4, hotel_test)
+
+  yhat_test_hotel = ifelse(unlist(hotel_pre) > 0.5, 1, 0)
+  confusion_out = table(y = hotel_test$children, yhat = yhat_test_hotel)
+  confusion_out  # confusion matrix
+  return(sum(diag(confusion_out))/sum(confusion_out))
+})
+
+head(hotel_acc,20)
+
+```
+
